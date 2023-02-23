@@ -2,6 +2,7 @@
 
 void screenInit();
 void screenClear(bool display = true);
+void buttonPressedISR();
 
 
 HardwareSerial Serial1(SERIAL1_RX, SERIAL1_TX);
@@ -12,6 +13,8 @@ Simulation *simulation;
 
 long t, deltaT;
 int tCount;
+volatile bool buttonPressed, ballToggle, ballLastToggle;
+unsigned long intTime, lastIntTime;
 
 void setup()
 {
@@ -29,16 +32,20 @@ void setup()
   task = new LED_Task(LED_PIN, 25, true);
   simulation = new Simulation(5,3);
 
+  attachInterrupt(digitalPinToInterrupt(BUTTON_PIN),buttonPressedISR,CHANGE);  
   if(Serial1)
   {
     Serial1.println("Program started.");
     delay(30);
     Serial1.printf("Screen size %dx%d",screen.width(), screen.height());
   }
+
+  pinMode(BUTTON_PIN, INPUT_PULLUP);
+  buttonPressed = false;
+  ballToggle = true;
+  ballLastToggle = true;
   tCount = 0;
 }
-
-
 
 void loop() 
 {
@@ -46,6 +53,21 @@ void loop()
   short nBalls;
   int i;
   float startMomentum, currentMomentum;
+  unsigned long t = millis();
+
+  if(buttonPressed && t-lastIntTime>20)
+  {
+    lastIntTime = t;
+    if(digitalRead(BUTTON_PIN) == LOW && ballLastToggle == true)
+    {
+      ballToggle = !ballToggle;
+      ballLastToggle = false;
+    }
+    else if(digitalRead(BUTTON_PIN) == HIGH && ballLastToggle == false)
+      ballLastToggle = true;
+    lastIntTime = t;
+    buttonPressed = false;
+  }
 
   screenClear(false);
   simulation->updatePositions(SCREEN_WIDTH, SCREEN_HEIGHT, task);
@@ -53,10 +75,15 @@ void loop()
   currentMomentum = simulation->getCurrentTotalMomentum();
   nBalls = simulation->getBalls(balls);
 
-  for(i=0; i<nBalls; i++)
-    screen.fillCircle(balls[i].position.x, balls[i].position.y, balls[i].radius, WHITE);
+  if(ballToggle)
+    for(i=0; i<nBalls; i++)
+      screen.fillCircle(balls[i].position.x, balls[i].position.y, balls[i].radius, WHITE);
+  else
+    for(i=0; i<nBalls; i++)
+      screen.drawCircle(balls[i].position.x, balls[i].position.y, balls[i].radius, WHITE);
 
-  if(deltaT > 0)
+
+  if(ballToggle && deltaT > 0)
   {
     screen.setCursor(3, 2);
     screen.print("m:");
@@ -78,6 +105,11 @@ void loop()
   }
   task->Tick();
   delay(1);
+}
+
+void buttonPressedISR()
+{
+  buttonPressed = true;
 }
 
 void screenInit()

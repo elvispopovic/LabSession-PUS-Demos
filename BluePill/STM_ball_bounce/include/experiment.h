@@ -11,6 +11,7 @@
 #define SERIAL1_TX PA9
 
 #define LED_PIN PC13
+#define BUTTON_PIN PB12
 
 #define SCREEN_WIDTH 128
 #define SCREEN_HEIGHT 64
