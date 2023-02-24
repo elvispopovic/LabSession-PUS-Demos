@@ -11,7 +11,8 @@ Adafruit_SSD1306 screen(SCREEN_WIDTH, SCREEN_HEIGHT, &Wire, -1); //ESP32
 ITask *task;
 Simulation *simulation;
 
-long t, deltaT;
+unsigned long t, t1;
+int deltaT;
 int tCount;
 volatile bool buttonPressed, ballToggle, ballLastToggle;
 unsigned long intTime, lastIntTime;
@@ -53,11 +54,11 @@ void loop()
   short nBalls;
   int i;
   float startMomentum, currentMomentum;
-  unsigned long t = millis();
+  t1=millis();
 
-  if(buttonPressed && t-lastIntTime>20)
+  if(buttonPressed && t1-lastIntTime>20)
   {
-    lastIntTime = t;
+    lastIntTime = t1;
     if(digitalRead(BUTTON_PIN) == LOW && ballLastToggle == true)
     {
       ballToggle = !ballToggle;
@@ -65,7 +66,7 @@ void loop()
     }
     else if(digitalRead(BUTTON_PIN) == HIGH && ballLastToggle == false)
       ballLastToggle = true;
-    lastIntTime = t;
+    lastIntTime = t1;
     buttonPressed = false;
   }
 
