@@ -1,0 +1,16 @@
+{
+	"folders": [
+		{
+			"path": ".."
+		},
+		{
+			"name": "I2C_OLED_Bounce_bitmap",
+			"path": "."
+		},
+		{
+			"name": "I2C_OLED_Bounce_bitmap",
+			"path": "../../Platformio_Bounce_bmp_ledstrip_dasduino/I2C_OLED_Bounce_bitmap"
+		}
+	],
+	"settings": {}
+}
